@@ -66,3 +66,16 @@ class UnpublishPostView(APIView):
 
         post_serializer = PostSerializer(post)
         return Response({'data': post_serializer.data, 'message': 'Post unpublished successfully'}, status=status.HTTP_200_OK)
+
+class PostsListview(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        published_posts = Post.objects.filter(published=True)
+        formatted_posts = []
+        for post in published_posts:
+            post_data = PostSerializer(post).data
+            post_data['created_at'] = post.created_at.strftime('%d-%m-%Y')
+            formatted_posts.append(post_data)
+
+        return Response({'data': formatted_posts}, status=status.HTTP_200_OK)

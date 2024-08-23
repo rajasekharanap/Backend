@@ -65,14 +65,14 @@ class UserLoginSerializer(serializers.Serializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['id', 'name']
+        fields = ['name']
 
 class PostSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
 
     class Meta:
         model = Post
-        fields = ['title', 'description', 'tags', 'created_at', 'published']
+        fields = ['id','title', 'description', 'tags', 'created_at', 'published']
     
     def create(self, validated_data):
         tags_data = validated_data.pop('tags', [])
@@ -81,3 +81,4 @@ class PostSerializer(serializers.ModelSerializer):
             tag, created = Tag.objects.get_or_create(**tag_data)
             post.tags.add(tag)
         return post
+
