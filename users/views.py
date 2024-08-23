@@ -76,6 +76,8 @@ class PostsListview(APIView):
         for post in published_posts:
             post_data = PostSerializer(post).data
             post_data['created_at'] = post.created_at.strftime('%d-%m-%Y')
+            post_data['likes_count'] = Like.objects.filter(post=post).count()
+            print(post_data)
             formatted_posts.append(post_data)
 
         return Response({'data': formatted_posts}, status=status.HTTP_200_OK)
@@ -89,9 +91,12 @@ class PostLikeUnlikeView(APIView):
         except Post.DoesNotExist:
             return Response({'error': 'Post not found'}, status=status.HTTP_404_NOT_FOUND)
         
+        if not post.published:
+            return Response({'error': 'Cannot like unpublished posts'}, status=status.HTTP_400_BAD_REQUEST)
+
         like, created = Like.objects.get_or_create(user=request.user, post=post)
         if not created:
             like.delete()
             return Response({'message': 'Unliked Post'}, status=status.HTTP_200_OK)
-        return Response({'message': 'Like Post'}, status=status.HTTP_201_CREATED)
+        return Response({'message': 'Liked Post'}, status=status.HTTP_201_CREATED)
 
