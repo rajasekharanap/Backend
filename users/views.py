@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from.serializers import UserSignupSerializer, UserLoginSerializer, PostSerializer
-from .models import Post
+from .models import Post, Like
 
 class UserSignupView(APIView):
     def post(self, request):
@@ -79,3 +79,19 @@ class PostsListview(APIView):
             formatted_posts.append(post_data)
 
         return Response({'data': formatted_posts}, status=status.HTTP_200_OK)
+    
+class PostLikeUnlikeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, post_id):
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return Response({'error': 'Post not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        if not created:
+            like.delete()
+            return Response({'message': 'Unliked Post'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Like Post'}, status=status.HTTP_201_CREATED)
+

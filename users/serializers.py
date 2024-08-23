@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import CustomUser, Tag, Post
+from .models import CustomUser, Tag, Post, Like
 import re
 
 
@@ -82,3 +82,7 @@ class PostSerializer(serializers.ModelSerializer):
             post.tags.add(tag)
         return post
 
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ['user', 'post']
