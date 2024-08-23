@@ -21,10 +21,16 @@ class UserLoginView(APIView):
         if serializer.is_valid():
             user = serializer.validated_data['user']
             refresh = RefreshToken.for_user(user)
+            posts = Post.objects.filter(author=user)
+            if posts.exists():
+                post_data = PostSerializer(posts, many=True).data
+            else:
+                post_data = "No posts created yet"
             return Response({
                 'message': 'Login successful',
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
+                'posts': post_data,
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
