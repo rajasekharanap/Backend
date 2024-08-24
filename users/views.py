@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from.serializers import UserSignupSerializer, UserLoginSerializer, PostSerializer
-from .models import Post, Like
+from .models import Post, Like, Tag
 
 class UserSignupView(APIView):
     def post(self, request):
@@ -113,3 +113,18 @@ class PostLikeUnlikeView(APIView):
             return Response({'message': 'Unliked Post'}, status=status.HTTP_200_OK)
         return Response({'message': 'Liked Post'}, status=status.HTTP_201_CREATED)
 
+class TagSearchView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        tag_name = request.query_params.get('tag_name', None)
+        if not tag_name:
+            return Response({'error': 'Tag name is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            tag = Tag.objects.get(name=tag_name)
+        except Tag.DoesNotExist:
+            return Response({'error': 'Tag not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        posts = Post.objects.filter(tags=tag)
+        serialized_posts = PostSerializer(posts, many=True).data
+        return Response({'posts': serialized_posts}, status=status.HTTP_200_OK)
