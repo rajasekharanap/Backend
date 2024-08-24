@@ -81,7 +81,7 @@ class PostSerializer(serializers.ModelSerializer):
             tag, created = Tag.objects.get_or_create(**tag_data)
             post.tags.add(tag)
         return post
-
+        
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
