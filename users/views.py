@@ -23,13 +23,20 @@ class UserLoginView(APIView):
             refresh = RefreshToken.for_user(user)
             posts = Post.objects.filter(author=user)
             if posts.exists():
-                post_data = PostSerializer(posts, many=True).data
+                post_data = []
+                for post in posts:
+                    post_info = PostSerializer(post).data
+                    like_count = Like.objects.filter(post=post).count()
+                    post_info['like_count'] = like_count
+                    post_data.append(post_info)
             else:
                 post_data = "No posts created yet"
+            info = "Here are the posts created by the user along with likes got for each one"
             return Response({
                 'message': 'Login successful',
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
+                'info': info,
                 'posts': post_data,
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
